@@ -9,10 +9,10 @@ when MayMulThrd:
   import std/locks
 template genGetXOrImpl(namOrId; X; Res: typedesc, ctype, ntype){.dirty.} =
   proc `def X OnNotFound`(name: ctype) =
-    raise newException(KeyError,
-      "get$1$2(): $2 not found: $3" % [
-      astToStr(X), astToStr(namOrId), repr(name)]
-    )
+    let s = try: "get$1$2(): $2 not found: $3" % [
+          astToStr(X), astToStr(namOrId), repr(name)]
+    except ValueError: doAssert false; ""  # unreachable
+    raise newException(KeyError, s)
   proc `get X namOrId`*(name: ctype, onFound: proc (x: ptr Res){.raises: [].},
       onNotFound: proc (name: ctype) = `def X OnNotFound`,
     ): cint{.effectsOf: onNotFound.} =
